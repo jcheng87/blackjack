@@ -19,15 +19,12 @@ class Deck:
 
 
 class Hand:
-    def __init__(self, type):
+    def __init__(self):
         self.current = []
         self.count = 0
 
-        # player vs dealer
-        self.type = type
-
-
-    def hit(self, card):
+    def hit(self, deck):
+        card = deck.draw()
         self.count += Hand.value(card)
         self.current.append(card)
 
@@ -38,23 +35,62 @@ class Hand:
 
         return count_dict[card[0]]
 
+    def clear(self):
+        self.current = []
+        self.count = 0
+
+
+
+class Player:
+    def __init__(self):
+
+        # player vs dealer
+        self.type = 'player'
+        self.hand = Hand()
+    
+    def hit(self, deck):
+        self.hand.hit(deck)
+
+
+class Dealer(Player):
+      def __init__(self):
+
+        # player vs dealer
+        self.type = 'dealer'
+        self.hand = Hand()
+
+
+
 
 class Table:
     def __init__(self,players):
-        self.seats = dict()
+        self.seats = []
 
         for player in range(players):
-            self.seats[f'player{player}'] = Hand('player')
-
-        self.seats['dealer'] = Hand('dealer')
+            self.seats.append(Player())
+        
+        self.seats.append(Dealer())
 
         self.deck = Deck()
-    
-    def deal(self):
-        for i in range(2):
-            for hand in self.seats.values():
-                hand.hit(self.deck.draw())
 
+
+
+
+    def deal(self):
+        self.deck.shuffle()
+        for i in range(2):
+            for player in self.seats:
+                player.hand.hit(self.deck.draw())
+                
+
+    def clear(self):
+        for player in self.seats:
+            player.hand.clear()
+
+    def display(self):
+        for player in self.seats:
+            print(f"player:{player.type}, hand: {player.hand.current}, count:{player.hand.count}")
+    
 
 
 
