@@ -39,6 +39,9 @@ class Hand:
         self.current = []
         self.count = 0
 
+    def display(self):
+        print(f"hand: {self.current}, count: {self.count}")
+
 
 
 class Player:
@@ -50,6 +53,14 @@ class Player:
     
     def hit(self, deck):
         self.hand.hit(deck)
+
+    def display(self):
+         print(f"player:{self.type}") 
+         self.hand.display()
+
+
+
+
 
 
 class Dealer(Player):
@@ -74,14 +85,29 @@ class Table:
         self.deck = Deck()
 
 
-
-
     def deal(self):
+        self.clear()
         self.deck.shuffle()
         for i in range(2):
             for player in self.seats:
-                player.hand.hit(self.deck.draw())
-                
+                player.hand.hit(self.deck)
+                player.status = 'play'
+        self.display()
+        
+    def action(self):
+        for player in self.seats:
+            while player.status == 'play':
+                player.display()
+                action = input("Hit or Stand")
+                if action.lower() == 'hit':
+                    player.hit(self.deck)
+                    if player.hand.count > 21:
+                        print('BUST!')
+                        player.status = 'bust'
+                elif action.lower() == 'stand':
+                    player.status = 'stand'
+
+
 
     def clear(self):
         for player in self.seats:
@@ -89,7 +115,10 @@ class Table:
 
     def display(self):
         for player in self.seats:
-            print(f"player:{player.type}, hand: {player.hand.current}, count:{player.hand.count}")
+            player.display()
+
+    
+
     
 
 
