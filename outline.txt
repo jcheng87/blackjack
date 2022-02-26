@@ -1,0 +1,29 @@
+Objects
+Game: start, end, 
+
+
+Table: represents current state
+
+Hand: represents cards in hand
+
+Deck: repr deck of cards
+
+
+
+steps:
+init Game
+
+
+Feature v1:
+
+
+
+1. chooses number of players + dealer
+2. deals cards
+3. user makes decision: hit or stand?
+4. repeat to 2.
+
+
+
+-add in Ace value count
+-add in basic strategy
