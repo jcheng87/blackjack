@@ -21,11 +21,39 @@ class Deck:
 class Hand:
     def __init__(self):
         self.current = []
+        
         self.count = 0
+
+        #tracks lower count in case of 'Ace' card
+        self.alt_count = 0
 
     def hit(self, deck):
         card = deck.draw()
+        
+        '''
+        1. draws card.
+        2. if 'A' is drawn and count <= 10, 'A' has two values.
+        2. if alt count is used, add card value to count and alt count
+            a. if main count is bust, alt count becomes main count. 
+            b. if neither is bust, use both
+        
+        '''
+
+        if card[0] == 'A' and self.count <= 10:
+            # if main count is <= 10
+            self.alt_count = self.count + 11
+                
+            # if count is > 11: add 1 to count or alt_count if exist. 
+        elif self.alt_count:
+            self.alt_count += Hand.value(card)
+
         self.count += Hand.value(card)
+        
+        # check hand count
+        if self.alt_count > 21:
+            self.alt_count = 0
+        
+
         self.current.append(card)
 
     def value(card):
@@ -40,7 +68,10 @@ class Hand:
         self.count = 0
 
     def display(self):
-        print(f"hand: {self.current}, count: {self.count}")
+        if self.alt_count:
+            print(f"hand: {self.current}, count: {self.count},({self.alt_count})")
+        else:
+            print(f"hand: {self.current}, count: {self.count}")
 
 
 
