@@ -19,17 +19,16 @@ class Deck:
 
 
 class Hand:
-    def __init__(self):
+    def __init__(self, dealer=False):
+        self.dealer = dealer
         self.current = []
-        
         self.count = 0
 
         #tracks lower count in case of 'Ace' card
         self.alt_count = 0
 
     def hit(self, deck):
-        card = deck.draw()
-        
+
         '''
         1. draws card.
         2. if 'A' is drawn and count <= 10, 'A' has two values.
@@ -39,19 +38,35 @@ class Hand:
         
         '''
 
-        if card[0] == 'A' and self.count <= 10:
-            # if main count is <= 10
-            self.alt_count = self.count + 11
+        card = deck.draw()
+        
+        # calculating total hand count
+        if card[0] == 'A' and self.count <= 10:   
+            if self.dealer:
+                # if dealer's hand and count is less than 10, Ace treated as 11; otherwise treated as one
+                self.count += 11
+            else: 
+                # if main count is <= 10, alt_count is count + 11. 
+                # If count is 11 or higher, Ace as 11 would bust
+                self.alt_count = self.count + 11
+                self.count += Hand.value(card)
                 
-            # if count is > 11: add 1 to count or alt_count if exist. 
         elif self.alt_count:
+            # if alt count exist, add card value to both count and alt count
+            # Ace treated as 1 if self.count >= 1.  
             self.alt_count += Hand.value(card)
+            self.count += Hand.value(card)
 
-        self.count += Hand.value(card)
+        else:
+            # if not any of conditions above, add card value to count
+            self.count += Hand.value(card)
         
         # check hand count
         if self.alt_count > 21:
             self.alt_count = 0
+        
+
+        
         
 
         self.current.append(card)
@@ -76,9 +91,10 @@ class Hand:
 
 
 class Player:
-    def __init__(self):
+    def __init__(self,name):
 
         # player vs dealer
+        self.name = name
         self.type = 'player'
         self.hand = Hand()
     
@@ -86,8 +102,8 @@ class Player:
         self.hand.hit(deck)
 
     def display(self):
-         print(f"player:{self.type}") 
-         self.hand.display()
+        print(f"player:{self.name}") 
+        self.hand.display()
 
 
 
@@ -98,8 +114,9 @@ class Dealer(Player):
       def __init__(self):
 
         # player vs dealer
+        self.name = 'Dealer'
         self.type = 'dealer'
-        self.hand = Hand()
+        self.hand = Hand(dealer=True)
 
 
 
@@ -109,7 +126,7 @@ class Table:
         self.seats = []
 
         for player in range(players):
-            self.seats.append(Player())
+            self.seats.append(Player(f"Player {player+1}"))
         
         self.seats.append(Dealer())
 
@@ -117,6 +134,7 @@ class Table:
 
 
     def deal(self):
+        print("-----Dealing Cards-----")
         self.clear()
         self.deck.shuffle()
         for i in range(2):
@@ -126,12 +144,14 @@ class Table:
         self.display()
         
     def action(self):
+        print('-----Starting Turn-----')
         for player in self.seats:
             while player.status == 'play':
                 player.display()
                 action = input("Hit or Stand")
                 if action.lower() == 'hit':
                     player.hit(self.deck)
+                    player.display()
                     if player.hand.count > 21:
                         print('BUST!')
                         player.status = 'bust'
@@ -139,11 +159,12 @@ class Table:
                     player.status = 'stand'
 
 
-
+    # clear hands in table
     def clear(self):
         for player in self.seats:
             player.hand.clear()
 
+    # displays all hands and counts for each player
     def display(self):
         for player in self.seats:
             player.display()
@@ -156,8 +177,20 @@ class Table:
 
 class Game:
     def __init__(self, players=1):
-        self.players_count = players
         self.table = Table(players)
+
+    def run_game(self):
+        replay = True
+        while replay:
+            self.table.deal()
+            self.table.action()
+
+            replay_q = input('========replay? (y/n)=========')
+
+            replay = replay_q == 'y'
+
+
+
         
 
 
